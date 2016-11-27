@@ -61,9 +61,9 @@ class pipeline (object):
         -------
         self
         '''
-        self.df.kwh.dropna(axis= 0, inplace = True)
+        self.df.dropna(inplace = True)
 
-    def erroneous_kwh(self, failure_timeframe = timedelta(hours = 12), failure_type = 0):
+    def erroneous_kwh(self, failure_timeframe = timedelta(hours = 48), failure_type = 0):
         '''
         Replace erroneous entries with dow-month mean.
         Zero values in this context are not realistic, they are likely communication errors.
@@ -148,13 +148,15 @@ class pipeline (object):
 
 
     def clean(self):
+        '''
+        Pre-processing of data (no significant features are created).
+        '''
 
         self.transform()
         self.fill_missing_temp()
         self.erroneous_kwh()
         self.partition()
         self.drop_duplicates()
-
 
 if __name__ == '__main__':
     pass
