@@ -47,6 +47,10 @@ class pipeline (object):
         # Year column
         self.df['year'] =  self.df.index.year
 
+        # Date columns
+        self.df['date'] = self.df.index.date
+
+
     def fill_missing_temp(self):
         '''
         Fill missing temp values by time aware interpolation.
@@ -58,15 +62,16 @@ class pipeline (object):
         # Time aware interpolation to fill missing values for temperature.
         self.df.temp = self.df.temp.interpolate(method = 'time')
 
-    def drop_duplicates(self):
+    def dropper(self):
         '''
-        Drop duplicated rows (happen to be kWh == NaN)
+        Drop duplicated rows (happen to be kWh == NaN), year, datecolumns.
 
         Returns
         -------
         self
         '''
         self.df.dropna(inplace = True)
+        self.df.drop(['year','date'], axis=1, inplace = True)
 
     def erroneous_kwh(self, failure_timeframe = timedelta(hours = 48), failure_type = 0):
         '''
@@ -133,9 +138,10 @@ class pipeline (object):
                             (_df.year == year)&
                             (_df.interval == interval)].kwh.mean(axis=0)
 
-    def partition(self, start_date = datetime(2012,11,2,0,30), end_date = datetime(2013,11,30,23,45)):
+    def valid_period(self, start_date = datetime(2012,11,2,0,30), end_date = datetime(2013,11,30,23,45)):
         '''
-        Partition dataset to analyis period.
+        Partition dataset to valid period only.
+
         Parameters
         ----------
         start_date: datetime, default 2012/11/2
@@ -165,17 +171,14 @@ class pipeline (object):
         '''
         # Generate min/max daily values.
         gb = self.df.resample('1D').temp
-        gb = gb.agg(['min','max']
+        gb = gb.agg(['min','max'])
+        gb=gb.rename(columns = {'min':'min_temp_d', 'max':'max_temp_d' })
 
-        # Create temporary date feature to merge both dateframes.
-        self.df['date'] = self.df.index.date
+        # Create date feature to merge both dateframes.
         gb['date'] = gb.index.date
 
         # Merge features.
-        self.df = pd.merge(self.df, gb, on ='date')
-
-        # Drop the temporary variable.
-        self.df.drop(['date'], axis =1, inplace = True)
+        self.df = self.df.reset_index().merge(gb, on ='date', how ='left').set_index('index')
 
     def _features_d_minus_1(self):
         '''
@@ -184,27 +187,74 @@ class pipeline (object):
         - morning load peak of d-1
         - evening load peak of d-1
         '''
-        # Create load minus 1 day feature.
+        # Create load minus 1 day kwh feature.
 
-        self.df['kwh_d_minus_1'] =  a.df.kwh.shift(96) #96 15-min intervals
+        self.df['kwh_d_minus_1'] =  self.df.kwh.shift(96) #96 15-min intervals
 
-        
+        # Create load minus 1 day morning peak and afternoon peak.
+
+        morning_max_d_minus = np.in1d(self.df.index.hour, np.array([7,8,9,10]))
+        evening_max_d_minus = np.in1d(self.df.index.hour, np.array([11,12,13,14,15,16,17,18]))
+
+        masks = [morning_max_d_minus,evening_max_d_minus]
+
+        # Generate max morning day - 1 values.
+
+        for i, mask in enumerate(masks):
+
+            gb = self.df[mask].resample('1D').kwh_d_minus_1
+            gb = gb.agg(['max'])
+            gb=gb.rename(columns = {'max':'%d'%i})
+            gb['date'] = gb.index.date
+
+            # Merge features morning feature.
+            self.df = self.df.reset_index().merge(gb, on ='date', how ='left').set_index('index')
+
+        self.df = self.df.rename(columns = {'0':'morning_max_d_minus', '1':'evening_max_d_minus'})
+
     '''
     ---------------------------
-    Section III: Run all scripts.
+    Section III: Run Pre-processing scripts and partition training-test set.
     '''
+
+    # def partition
 
     def clean(self):
         '''
         Pre-processing of data.
         '''
-
         self.transform()
         self.fill_missing_temp()
         self.erroneous_kwh()
-        self.partition()
+        self.valid_period()
         self._features_d()
-        self.drop_duplicates()
+        self._features_d_minus_1()
+        self.dropper()
+
+    def training_test_partition(self):
+
+        '''
+        Generate train-test set.
+
+        Output
+        ------
+
+        train: csv file
+            All dataset minus last 2-weeks of dataset.
+
+        test: csv file
+            Last 2-weeks of dataset.
+        '''
+
+        train_start_date = datetime(2012,11,2,0,30)
+        train_end_date = datetime(2013,11,15,23,45)
+
+        test_start_date = datetime(2013,11,16,0,0)
+        test_end_date = datetime(2013,11,30,23,45)
+
+        self.df[train_start_date:train_end_date].to_csv('../data/train_cleaned.csv')
+        self.df[test_start_date:test_end_date].to_csv('../data/test_cleaned.csv')
+
 
 if __name__ == '__main__':
     pass
