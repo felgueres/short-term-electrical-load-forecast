@@ -128,7 +128,7 @@ class pipeline (object):
                             (_df.year == year)&
                             (_df.interval == interval)].kwh.mean(axis=0)
 
-    def partition(self, start_date = datetime(2012,11,2,0,30), end_date = datetime(2013,12,1)):
+    def partition(self, start_date = datetime(2012,11,2,0,30), end_date = datetime(2013,11,30,23,45)):
         '''
         Partition dataset to analyis period.
         Parameters
