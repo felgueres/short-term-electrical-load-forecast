@@ -20,6 +20,11 @@ class pipeline (object):
         # Load Dataframe from path.
         self.df = pd.read_csv(path)
 
+    '''
+    --------------------------------
+    Section I : Clean-Transform-Fill
+    '''
+
     def transform(self):
         '''
         Set index, formatting and structure of dataframe.
@@ -146,16 +151,59 @@ class pipeline (object):
 
         self.df = self.df[start_date:end_date]
 
+    '''
+    ---------------------------
+    Section II: Create features
+    '''
+
+    def _features_d(self):
+        '''
+        Create features:
+        - min temp values for day d
+        - max temp values for day d
+
+        '''
+        # Generate min/max daily values.
+        gb = self.df.resample('1D').temp
+        gb = gb.agg(['min','max']
+
+        # Create temporary date feature to merge both dateframes.
+        self.df['date'] = self.df.index.date
+        gb['date'] = gb.index.date
+
+        # Merge features.
+        self.df = pd.merge(self.df, gb, on ='date')
+
+        # Drop the temporary variable.
+        self.df.drop(['date'], axis =1, inplace = True)
+
+    def _features_d_minus_1(self):
+        '''
+        Create features:
+        - load of day d-1 at time interval h
+        - morning load peak of d-1
+        - evening load peak of d-1
+        '''
+        # Create load minus 1 day feature.
+
+        self.df['kwh_d_minus_1'] =  a.df.kwh.shift(96) #96 15-min intervals
+
+        
+    '''
+    ---------------------------
+    Section III: Run all scripts.
+    '''
 
     def clean(self):
         '''
-        Pre-processing of data (no significant features are created).
+        Pre-processing of data.
         '''
 
         self.transform()
         self.fill_missing_temp()
         self.erroneous_kwh()
         self.partition()
+        self._features_d()
         self.drop_duplicates()
 
 if __name__ == '__main__':

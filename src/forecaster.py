@@ -9,14 +9,12 @@ class forecaster(object):
 
     Parameters
     ----------
-
     path: str
         Path to csv file.
 
     model: str
         Model type:
-        - ‘RF’ : Random Forest (default)
-
+        RF : Random Forest (default)
     '''
 
     def __init__(self, path, model = 'RF'):
@@ -29,26 +27,9 @@ class forecaster(object):
 
             self._featurize_randomforest()
 
-    def _featurize_randomforest(self):
+    def _scale(self):
         '''
         Build features for random forest.
-        '''
-        pass
-
-    def _features_d(self):
-        '''
-        Create features:
-        - min values for day d
-        - max values for day d
-        '''
-        pass
-
-    def _features_d_minus_1(self):
-        '''
-        Create features:
-        - load of day d-1 at time interval h
-        - morning load peak of d-1
-        - evening load peak of d-1
         '''
         pass
 
@@ -75,6 +56,6 @@ class forecaster(object):
         Plot error distribution.
         '''
         pass
-        
+
 if __name__ == '__main__':
     pass
