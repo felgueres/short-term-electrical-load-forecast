@@ -1,6 +1,6 @@
 
 > pipeline class
-    methods:
+>> methods:
 
 -   Clean erroneous data
 -   Fill missing values of load and temperature
@@ -8,7 +8,7 @@
 -   Partition dataset (Train-Validate-Test)
 
 > forecaster class
-    methods:
+>> methods:
 
 -   Scale data
 -   Fit model
@@ -16,6 +16,6 @@
 -   Plot error
 
 > evaluation class
-    methods:
+>> methods:
 
 -   performance validation
