@@ -217,8 +217,6 @@ class pipeline (object):
     Section III: Run Pre-processing scripts and partition training-test set.
     '''
 
-    # def partition
-
     def clean(self):
         '''
         Pre-processing of data.
@@ -235,6 +233,7 @@ class pipeline (object):
 
         '''
         Generate train-test set.
+        Proper way to do this would be randomly divide the dataset into 
 
         Output
         ------

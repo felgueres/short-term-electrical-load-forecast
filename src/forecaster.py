@@ -15,17 +15,15 @@ class forecaster(object):
     model: str
         Model type:
         RF : Random Forest (default)
+
+    **kwargs: dict
+
     '''
 
     def __init__(self, path, model = 'RF'):
 
         self.df = pd.read_csv(path, index_col=0, parse_dates=True)
-
         # Create features for specified model.
-
-        if model == 'RF':
-
-            self._featurize_randomforest()
 
     def _scale(self):
         '''
