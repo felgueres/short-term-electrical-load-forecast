@@ -1,19 +1,21 @@
 Files and description:
 
-#### pipeline class
+#### pipeline
 
 -   Clean erroneous data
 -   Fill missing values of load and temperature
 -   Create features
--   Partition dataset (Train-Validate-Test)
+-   Partition dataset (Train-Test)
 
-#### forecaster class
+#### forecaster
 
--   Scale data
--   Fit model
--   Predict
--   Plot error
+-   Init Random Forest Regressor
+-   Cross validation
 
-#### evaluation class
+#### evaluation
 
--   performance validation
+-   model performance
+
+#### metric_funcs and plotter_funcs
+
+-   support functions

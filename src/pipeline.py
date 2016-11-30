@@ -3,16 +3,15 @@ import numpy as np
 from datetime import datetime, timedelta
 
 
-class pipeline (object):
+class Pipeline (object):
 
     '''
-    Clean, transform and handle missing values on dataset.
+    Data pipeline: Format, create features and handle missing/erroneous values.
 
     Parameters
     ----------
     path: string
         Path to csv file.
-
     '''
 
     def __init__(self, path):
@@ -25,9 +24,10 @@ class pipeline (object):
     Section I : Clean-Transform-Fill
     '''
 
-    def transform(self):
+    def _transform(self):
         '''
-        Set index, formatting and structure of dataframe.
+        Set DatetimeIndex, formatting and structure to dataframe.
+
         Returns
         -------
         self
@@ -51,9 +51,10 @@ class pipeline (object):
         self.df['date'] = self.df.index.date
 
 
-    def fill_missing_temp(self):
+    def _fill_missing_temp(self):
         '''
         Fill missing temp values by time aware interpolation.
+
         Returns
         -------
         self
@@ -62,7 +63,7 @@ class pipeline (object):
         # Time aware interpolation to fill missing values for temperature.
         self.df.temp = self.df.temp.interpolate(method = 'time')
 
-    def dropper(self):
+    def _dropper(self):
         '''
         Drop duplicated rows (happen to be kWh == NaN), year, datecolumns.
 
@@ -73,17 +74,15 @@ class pipeline (object):
         self.df.dropna(inplace = True)
         self.df.drop(['year','date'], axis=1, inplace = True)
 
-    def erroneous_kwh(self, failure_timeframe = timedelta(hours = 48), failure_type = 0):
+    def _erroneous_kwh(self, failure_timeframe = timedelta(hours = 48), failure_type = 0):
         '''
         Replace erroneous entries with dow-month mean.
         Zero values in this context are not realistic, they are likely communication errors.
 
         Parameters
         ----------
-
         failure_timeframe: timedelta, default = timedelta(hours =1)
             Specify the tolerance timeframe to discard erroneous data.
-
         failure_type: int, default = 0
             Specify considerations for erroneous data.
             TODO: Expand for complex failure detection.
@@ -105,9 +104,9 @@ class pipeline (object):
         # Replace values with dow mean.
         for ts in time_index:
             event = self.df.loc[ts]
-            self.df.loc[ts,'kwh'] = self.dow_mean(event.dow, event.month, event.year, event.interval, time_index)
+            self.df.loc[ts,'kwh'] = self._dow_mean(event.dow, event.month, event.year, event.interval, time_index)
 
-    def dow_mean(self, dow, month, year, interval, time_index):
+    def _dow_mean(self, dow, month, year, interval, time_index):
         '''
         Returns mean of dow for given month/year.
 
@@ -138,18 +137,15 @@ class pipeline (object):
                             (_df.year == year)&
                             (_df.interval == interval)].kwh.mean(axis=0)
 
-    def valid_period(self, start_date = datetime(2012,11,2,0,30), end_date = datetime(2013,11,30,23,45)):
+    def _valid_period(self, start_date = datetime(2012,11,2,0,30), end_date = datetime(2013,11,30,23,45)):
         '''
         Partition dataset to valid period only.
-
         Parameters
         ----------
         start_date: datetime, default 2012/11/2
             Start of analysis period.
-
         end_date: datetime, default 2013/12/1
             End of analysis period.
-
         Returns
         -------
         self
@@ -167,7 +163,6 @@ class pipeline (object):
         Create features:
         - min temp values for day d
         - max temp values for day d
-
         '''
         # Generate min/max daily values.
         gb = self.df.resample('1D').temp
@@ -210,6 +205,7 @@ class pipeline (object):
             # Merge features morning feature.
             self.df = self.df.reset_index().merge(gb, on ='date', how ='left').set_index('index')
 
+        # Change names.
         self.df = self.df.rename(columns = {'0':'morning_max_d_minus', '1':'evening_max_d_minus'})
 
     '''
@@ -217,43 +213,40 @@ class pipeline (object):
     Section III: Run Pre-processing scripts and partition training-test set.
     '''
 
-    def clean(self):
-        '''
-        Pre-processing of data.
-        '''
-        self.transform()
-        self.fill_missing_temp()
-        self.erroneous_kwh()
-        self.valid_period()
-        self._features_d()
-        self._features_d_minus_1()
-        self.dropper()
-
-    def training_test_partition(self):
+    def _partition_train_test(self):
 
         '''
-        Generate train-test set.
-        Proper way to do this would be randomly divide the dataset into 
+        Partition train-validation and test set (this shall be done strictly once).
 
         Output
         ------
-
         train: csv file
-            All dataset minus last 2-weeks of dataset.
-
+            All dataset minus last month of dataset.
         test: csv file
             Last 2-weeks of dataset.
         '''
 
         train_start_date = datetime(2012,11,2,0,30)
-        train_end_date = datetime(2013,11,15,23,45)
+        train_end_date = datetime(2013,10,31,23,45)
 
-        test_start_date = datetime(2013,11,16,0,0)
+        test_start_date = datetime(2013,11,01,0,0)
         test_end_date = datetime(2013,11,30,23,45)
 
         self.df[train_start_date:train_end_date].to_csv('../data/train_cleaned.csv')
         self.df[test_start_date:test_end_date].to_csv('../data/test_cleaned.csv')
 
+    def clean(self):
+        '''
+        Pre-processing of data.
+        '''
+        self._transform()
+        self._fill_missing_temp()
+        self._erroneous_kwh()
+        self._valid_period()
+        self._features_d()
+        self._features_d_minus_1()
+        self._dropper()
+        self._partition_train_test()
 
 if __name__ == '__main__':
     pass

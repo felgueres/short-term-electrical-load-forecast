@@ -1,8 +1,9 @@
 import numpy as np
+from metric_funcs import mape
 
-class evaluation(object):
+class Evaluation(object):
     '''
-    Produce evaluation metrics.
+    Produce evaluation metric.
 
     Parameters
     ----------
@@ -11,16 +12,14 @@ class evaluation(object):
     ------
     '''
 
-    def __init__(self, score):
-        '''
+    def __init__(self):
 
         '''
+        '''
 
-
-    def evaluate(self):
+    def get_scores(forecaster, X_train, X_test, y_train, y_test, score):
         '''
         Returns in-sample and out-of-sample validation
-
 
         Parameters
         ----------
@@ -28,13 +27,11 @@ class evaluation(object):
         score: string
         '''
 
+        model = forecaster
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-def MAPE(y_true, y_pred):
-    """
-    Returns Mean Absolute Percentage Error
-    """
-
-    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+        return mape(y_test, y_pred)
 
 
 if __name__ == '__main__':

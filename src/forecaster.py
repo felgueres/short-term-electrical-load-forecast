@@ -1,59 +1,64 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.cross_validation import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import TimeSeriesSplit
 
-class forecaster(object):
+class Forecaster(object):
     '''
-    Forecasts load.
+    Forecasts 24-hr horizon load at 15-min intervals using a Random Forest Regressor.
 
     Parameters
     ----------
     path: str
         Path to csv file.
 
-    model: str
-        Model type:
-        RF : Random Forest (default)
-
-    **kwargs: dict
+    kwargs: dict
+        Parameters for sklearn RandomForestClassifier
 
     '''
 
-    def __init__(self, path, model = 'RF'):
+    def __init__(self, data, splits_cross_val = 12, **kwargs):
 
-        self.df = pd.read_csv(path, index_col=0, parse_dates=True)
-        # Create features for specified model.
+        #Load dataset.
+        self.df = pd.read_csv(data, index_col=0, parse_dates=True)
 
-    def _scale(self):
+        #Initialize model with tuning parameters.
+        self.model = RandomForestRegressor(**kwargs)
+
+        #Set number of splits for cross validation
+        self.splits_cross_val = splits_cross_val
+
+        #set response variable
+        self.y = self.df.pop('kwh')
+
+        #set feature space
+        self.X = self.df.values
+
+    def cross_validation(self):
+
         '''
-        Build features for random forest.
+        Create train-validate for cross validation.
+
+        training_time: str
+            Time to train a single prediction task.
+            (Eg. To cross validate this model we need:
+                - generate as many partitions as possible given the number of splits
+                - each task will be trained-tested
+                - compute average MSE for all tasks
+
+        Output
+        ------
+
         '''
         pass
 
-    def fit(self):
-        '''
-        Fit specified model.
-        '''
-        pass
+    def cross_val(self):
 
-    def predict(self):
-        '''
-        Predict in-sample and out-of-sample cases.
-        '''
-        pass
+        tscv = TimeSeriesSplit(n_splits = self.splits_cross_val)
 
-    def plot_in_sample(self):
-        '''
-        Plot actual vs. predicted.
-        '''
-        pass
-
-    def plot_error(self):
-        '''
-        Plot error distribution.
-        '''
-        pass
+        for train, test in tscv.split(self.X):
+            print("%s %s" % (train, test))
 
 if __name__ == '__main__':
     pass
