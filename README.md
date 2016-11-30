@@ -44,8 +44,6 @@ Overview:
 
         See notebooks/02 for details.
 
-![alt tag] (https://github.com/felgueres/load-forecast/blob/master/notebooks/02-pf-time-series-cross-validation-and-load-forecasting-demo.ipynb)
-
 ### 4) Test model
 
 -   Evaluation class
