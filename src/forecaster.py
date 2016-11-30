@@ -27,6 +27,14 @@ class Forecaster(object):
         #Init model with tuning parameters.
         self.model = RandomForestRegressor(*kwargs)
 
+        #Init train, test, variables.
+        self.y_train = None
+        self.X_train = None
+        self.y_test = None
+        self.X_test = None
+
+        self.test_index = None
+
     def cross_val(self, error = mean_squared_error, training_time = '3W', **kwargs):
 
         '''
@@ -77,14 +85,14 @@ class Forecaster(object):
             test_end = test_start + one_day
 
             #Vectorize training-test data.
-            X_train, X_test, y_train, y_test = self.vectorize(train_start, train_end, test_start, test_end)
+            self.vectorize(train_start, train_end, test_start, test_end)
 
             #Fit-Predict
             self.model = RandomForestRegressor(**kwargs)
-            self.model.fit(X_train, y_train)
-            y_predict = self.model.predict(X_test)
+            self.model.fit(self.X_train, self.y_train)
+            y_predict = self.model.predict(self.X_test)
 
-            MSE.append(error(y_test, y_predict))
+            MSE.append(error(self.y_test, self.y_predict))
 
         return MSE
 
@@ -104,13 +112,14 @@ class Forecaster(object):
         df_train  = self.df[train_start:train_end]
         df_test = self.df[test_start:test_end]
 
-        y_train = df_train.pop('kwh')
-        X_train = df_train.values
+        #Get index for plotting afterwards.
+        self.test_index = df_test.index
 
-        y_test = df_test.pop('kwh')
-        X_test = df_test.values
+        self.y_train = df_train.pop('kwh')
+        self.X_train = df_train.values
 
-        return X_train, X_test, y_train, y_test
+        self.y_test = df_test.pop('kwh')
+        self.X_test = df_test.values
 
 if __name__ == '__main__':
     pass

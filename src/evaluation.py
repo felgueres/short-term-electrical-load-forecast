@@ -17,33 +17,31 @@ class Evaluation(object):
         '''
         Init forecaster
         '''
+        self.forecaster = forecaster
+        self.y_pred = None
 
-        self.model = forecaster
-
-    def get_scores(X_train, X_test, y_train, y_test, score):
+    def get_scores(self, score_metric):
         '''
-        Returns in-sample and out-of-sample validation
+        Returns test score.
 
         Parameters
         ----------
 
-        score: function
+        score_metric: function
             Function to output model performance.
 
-        X_train, X_test, y_train, y_test: numpy arrays
-            Values to train-predict.
-
+        Returns:
+            Model score, float
         '''
 
         #Train test set.
-        self.model.fit(X_train, y_train)
+        self.forecaster.model.fit(self.forecaster.X_train, self.forecaster.y_train)
 
         #Predict response.
-        y_pred = self.model.predict(X_test)
+        self.y_pred = self.forecaster.model.predict(self.forecaster.X_test)
 
         #Return score
-        return score(y_test, y_pred)
-
+        print 'The MAPE for this model is: ', score_metric(self.forecaster.y_test, self.y_pred)
 
 if __name__ == '__main__':
     pass
