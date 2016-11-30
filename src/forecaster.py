@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import TimeSeriesSplit
+from metric_funcs import mape
 
 class Forecaster(object):
     '''
@@ -18,15 +19,15 @@ class Forecaster(object):
 
     '''
 
-    def __init__(self, data, splits_cross_val = 12, **kwargs):
+    def __init__(self, data, **kwargs):
 
         #Load dataset.
         self.df = pd.read_csv(data, index_col=0, parse_dates=True)
 
         #Init model with tuning parameters.
-        self.model = RandomForestRegressor(**kwargs)
+        self.model = RandomForestRegressor(*kwargs)
 
-    def cross_val(self, training_time = '3W', **kwargs):
+    def cross_val(self, error = mean_squared_error, training_time = '3W', **kwargs):
 
         '''
         Cross validation timeseries.
@@ -83,7 +84,7 @@ class Forecaster(object):
             self.model.fit(X_train, y_train)
             y_predict = self.model.predict(X_test)
 
-            MSE.append(mean_squared_error(y_test, y_predict))
+            MSE.append(error(y_test, y_predict))
 
         return MSE
 

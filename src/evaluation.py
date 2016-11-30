@@ -3,7 +3,7 @@ from metric_funcs import mape
 
 class Evaluation(object):
     '''
-    Produce evaluation metric.
+    Produce model performance metric.
 
     Parameters
     ----------
@@ -12,26 +12,37 @@ class Evaluation(object):
     ------
     '''
 
-    def __init__(self):
+    def __init__(self, forecaster):
 
         '''
+        Init forecaster
         '''
 
-    def get_scores(forecaster, X_train, X_test, y_train, y_test, score):
+        self.model = forecaster
+
+    def get_scores(X_train, X_test, y_train, y_test, score):
         '''
         Returns in-sample and out-of-sample validation
 
         Parameters
         ----------
 
-        score: string
+        score: function
+            Function to output model performance.
+
+        X_train, X_test, y_train, y_test: numpy arrays
+            Values to train-predict.
+
         '''
 
-        model = forecaster
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+        #Train test set.
+        self.model.fit(X_train, y_train)
 
-        return mape(y_test, y_pred)
+        #Predict response.
+        y_pred = self.model.predict(X_test)
+
+        #Return score
+        return score(y_test, y_pred)
 
 
 if __name__ == '__main__':

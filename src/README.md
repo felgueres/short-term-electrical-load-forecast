@@ -9,13 +9,13 @@ Files and description:
 
 #### forecaster
 
--   Init Random Forest Regressor
--   Cross validation
+-   Random Forest Regressor
+-   Time-series cross validation
 
 #### evaluation
 
--   model performance
+-   Model Performance
 
 #### metric_funcs and plotter_funcs
 
--   support functions
+-   Support functions
