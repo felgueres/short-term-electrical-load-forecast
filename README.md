@@ -52,7 +52,7 @@ Overview:
 
         Used Mean Absolute Percentage Error
 
--   Sample prediction
+-   Sample out-of-sample prediction: MAPE = 1.8 % 
 
 ![alt tag] (https://github.com/felgueres/load-forecast/blob/master/figures/02-One-Day-Forecast.png)
 
