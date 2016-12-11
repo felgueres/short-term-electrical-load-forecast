@@ -30,9 +30,9 @@ Overview:
 
 -   Model Selection:
 
-        Random Forest -- Perform good with non-linear data, easy tuning (given time constraint) and implementation, scalable for in this application.
+        Random Forest -- Perform good with non-linear data, easy tuning (given time constraint) and implementation, scalable for this application.
 
-        Working hypothesis: For better performance, multiple independent models, no long-term exposure to avoid bias.
+        Working hypothesis about the model: Multiple independent models perform better than an aggregate since long-term exposure would introduce trend bias.
 
 -   Feature creation:
 
