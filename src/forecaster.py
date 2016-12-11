@@ -25,7 +25,7 @@ class Forecaster(object):
         self.df = pd.read_csv(data, index_col=0, parse_dates=True)
 
         #Init model with tuning parameters.
-        self.model = RandomForestRegressor(*kwargs)
+        self.model = RandomForestRegressor(**kwargs)
 
         #Init train, test, variables.
         self.y_train = None
