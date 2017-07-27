@@ -26,7 +26,7 @@ Overview:
 
         Explored relationship of time - temperature - load
 
-![alt tag] (https://github.com/felgueres/load-forecast/blob/master/figures/01-EDA-temp-load-relationship.png)
+![alt tag](https://github.com/felgueres/load-forecast/blob/master/figures/01-EDA-temp-load-relationship.png)
 
 -   Model Selection:
 
@@ -52,9 +52,9 @@ Overview:
 
         Used Mean Absolute Percentage Error
 
--   Sample out-of-sample prediction: MAPE = 1.8 % 
+-   Sample out-of-sample prediction: MAPE = 1.8 %
 
-![alt tag] (https://github.com/felgueres/load-forecast/blob/master/figures/02-One-Day-Forecast.png)
+![alt tag](https://github.com/felgueres/load-forecast/blob/master/figures/02-One-Day-Forecast.png)
 
 ### 5) Ongoing thoughts
 
